@@ -5,6 +5,7 @@ using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
+using BLToolkit.Fluent.Test.MockDataBase;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BLToolkit.Fluent.Test
@@ -22,6 +23,7 @@ namespace BLToolkit.Fluent.Test
 		public void Initialize()
 		{
 			DbManager.AddDataProvider(typeof(SQLiteDataProvider));
+			DbManager.AddDataProvider(typeof(MockDataProvider));
 			_conn = new SQLiteConnection("data source=:memory:");
 			_db = new DbManager(_conn);
 			FluentConfig.Configure(_db, FluentConfig.GetMapingFromAssemblyOf<FluentMapTest>());
@@ -73,19 +75,23 @@ namespace BLToolkit.Fluent.Test
 		[TestMethod]
 		public void ShouldMapPrimaryKey()
 		{
-			_db.SetCommand("create table PrimaryKeyDbo (Field1 int, Field2 int)").ExecuteNonQuery();
+			var conn = new MockDb()
+				.NewReader("Field1", "Field2")
+					.NewRow(1, 2);
 
-			new FluentMap<PrimaryKeyDbo>()
-				.PrimaryKey(_ => _.Field2)
-				.MapTo(_db);
+			using (conn)
+			using (var db = new DbManager(conn))
+			{
+				new FluentMap<PrimaryKeyDbo>()
+					.PrimaryKey(_ => _.Field2)
+					.MapTo(db);
 
-			var table = _db.GetTable<PrimaryKeyDbo>();
-			table.Insert(() => new PrimaryKeyDbo { Field1 = 10, Field2 = 1 });
-			table.Insert(() => new PrimaryKeyDbo { Field1 = 20, Field2 = 2 });
+				AssertEx.AreNotException<Exception>(() => new SqlQuery<PrimaryKeyDbo>(db).SelectByKey(1)
+					, "Fail query");
 
-			var dbo = new SqlQuery<PrimaryKeyDbo>(_db).SelectByKey(1);
-
-			Assert.AreEqual(10, dbo.Field1, "Неверный результат");
+				Assert.AreEqual(1, conn.Commands[0].Parameters.Count, "Fail params");
+				conn.Verify("Not query");
+			}
 		}
 
 		/// <summary>
@@ -94,19 +100,21 @@ namespace BLToolkit.Fluent.Test
 		[TestMethod]
 		public void ShouldMapNonUpdatable()
 		{
-			_db.SetCommand("create table NonUpdatableDbo (Field1 int, Field2 int)").ExecuteNonQuery();
+			var conn = new MockDb()
+				.NewNonQuery();
 
-			new FluentMap<NonUpdatableDbo>()
-				.NonUpdatable(_ => _.Field1)
-				.MapTo(_db);
+			using (conn)
+			using (var db = new DbManager(conn))
+			{
+				new FluentMap<NonUpdatableDbo>()
+					.NonUpdatable(_ => _.Field1)
+					.MapTo(db);
 
-			new SqlQuery<NonUpdatableDbo>(_db).Insert(new NonUpdatableDbo { Field1 = 10, Field2 = 1 });
+				new SqlQuery<NonUpdatableDbo>(db).Insert(new NonUpdatableDbo { Field1 = 10, Field2 = 1 });
 
-			var table = _db.GetTable<NonUpdatableDbo>();
-			var dbo = (from t in table where t.Field2 == 1 select t).First();
-
-			Assert.AreNotEqual(10, dbo.Field1, "Поле было обновлено");
-			Assert.AreEqual(1, dbo.Field2, "Неверный результат");
+				Assert.AreEqual(1, conn.Commands[0].Parameters.Count, "Fail params");
+				conn.Verify("Not query");
+			}
 		}
 
 		/// <summary>
@@ -115,19 +123,25 @@ namespace BLToolkit.Fluent.Test
 		[TestMethod]
 		public void ShouldMapSqlIgnoreInsert()
 		{
-			_db.SetCommand("create table SqlIgnoreInsertDbo (Field1 int)").ExecuteNonQuery();
+			var conn = new MockDb()
+				.NewNonQuery();
 
-			new FluentMap<SqlIgnoreInsertDbo>()
-				.SqlIgnore(_ => _.Field2)
-				.MapTo(_db);
+			using (conn)
+			using (var db = new DbManager(conn))
+			{
+				new FluentMap<SqlIgnoreInsertDbo>()
+					.SqlIgnore(_ => _.Field2)
+					.MapTo(db);
 
 
-			AssertEx.AreNotException<Exception>(
-				() => new SqlQuery<SqlIgnoreInsertDbo>(_db).Insert(new SqlIgnoreInsertDbo { Field1 = 20, Field2 = 2 })
-				, "Поле задействовано");
-			AssertEx.AreException<LinqException>(
-				() => _db.GetTable<SqlIgnoreInsertDbo>().Insert(() => new SqlIgnoreInsertDbo { Field1 = 10, Field2 = 1 })
-				, "Поле доступно в linq");
+				new SqlQuery<SqlIgnoreInsertDbo>(db).Insert(new SqlIgnoreInsertDbo { Field1 = 20, Field2 = 2 });
+				AssertEx.AreException<LinqException>(
+					() => db.GetTable<SqlIgnoreInsertDbo>().Insert(() => new SqlIgnoreInsertDbo { Field1 = 10, Field2 = 1 })
+					, "Поле доступно в linq");
+
+				Assert.AreEqual(1, conn.Commands[0].Parameters.Count, "Fail params");
+				conn.Verify("Not query");
+			}
 		}
 
 		/// <summary>
@@ -136,17 +150,100 @@ namespace BLToolkit.Fluent.Test
 		[TestMethod]
 		public void ShouldMapSqlIgnoreSelect()
 		{
-			_db.SetCommand("create table SqlIgnoreSelectDbo (Field1 int, Field2 int)").ExecuteNonQuery();
-			_db.SetCommand("insert into SqlIgnoreSelectDbo (Field1, Field2) values(10,1)").ExecuteNonQuery();
+			var conn = new MockDb()
+				.NewReader("Field1")
+					.NewRow(10);
 
-			new FluentMap<SqlIgnoreSelectDbo>()
-				.SqlIgnore(_ => _.Field2)
-				.MapTo(_db);
-			var table = _db.GetTable<SqlIgnoreSelectDbo>();
+			using (conn)
+			using (var db = new DbManager(conn))
+			{
+				new FluentMap<SqlIgnoreSelectDbo>()
+					.SqlIgnore(_ => _.Field2)
+					.MapTo(db);
+				var table = db.GetTable<SqlIgnoreSelectDbo>();
 
-			var dbo = (from t in table where t.Field1 == 10 select t).First();
+				var dbo = (from t in table where t.Field1 == 10 select t).First();
 
-			Assert.AreNotEqual(1, dbo.Field2, "Значение считано");
+				Assert.AreNotEqual(1, dbo.Field2, "Значение считано");
+				conn.Verify("Not query");
+			}
+		}
+
+		/// <summary>
+		/// Поле должно игнорироваться при вставке
+		/// </summary>
+		[TestMethod]
+		public void ShouldMapIgnoreInsert()
+		{
+			var conn = new MockDb()
+				.NewNonQuery();
+
+			using (conn)
+			using (var db = new DbManager(conn))
+			{
+				new FluentMap<MapIgnoreInsertDbo>()
+					.MapIgnore(_ => _.Field2)
+					.MapTo(db);
+
+				new SqlQuery<MapIgnoreInsertDbo>(db).Insert(new MapIgnoreInsertDbo { Field1 = 20, Field2 = 2 });
+
+				AssertEx.AreException<LinqException>(
+					() => db.GetTable<MapIgnoreInsertDbo>().Insert(() => new MapIgnoreInsertDbo { Field1 = 10, Field2 = 1 })
+					, "Поле доступно в linq");
+
+				Assert.AreEqual(1, conn.Commands[0].Parameters.Count, "");
+				conn.Verify("Not query");
+			}
+		}
+
+		/// <summary>
+		/// Поле должно игнорироваться при запросе
+		/// </summary>
+		[TestMethod]
+		public void ShouldMapIgnoreSelect()
+		{
+			var conn = new MockDb()
+				.NewReader("Field1", "Field2")
+					.NewRow(10, 1);
+
+			using (conn)
+			using (var db = new DbManager(conn))
+			{
+				new FluentMap<MapIgnoreSelectDbo>()
+					.MapIgnore(_ => _.Field2)
+					.MapTo(db);
+				var table = db.GetTable<MapIgnoreSelectDbo>();
+
+				var dbo = (from t in table where t.Field1 == 10 select t).First();
+
+				Assert.AreNotEqual(1, dbo.Field2, "Значение считано");
+				conn.Verify("Not query");
+			}
+		}
+
+		/// <summary>
+		/// Test Trimmable
+		/// </summary>
+		[TestMethod]
+		public void ShouldMapTrimmable()
+		{
+			var conn = new MockDb()
+				.NewReader("Field1")
+					.NewRow("test     ");
+
+			using (conn)
+			using (var db = new DbManager(conn))
+			{
+				new FluentMap<TrimmableDbo>()
+					.Trimmable(_ => _.Field1)
+					.MapTo(db);
+				var table = db.GetTable<TrimmableDbo>();
+
+				var dbo = (from t in table select t).First();
+
+				Assert.AreEqual("test", dbo.Field1, "Not trimmable");
+				conn.Verify("Not query");
+			}
 		}
 
 		public class TableNameDbo
@@ -176,6 +273,20 @@ namespace BLToolkit.Fluent.Test
 		{
 			public int Field1 { get; set; }
 			public int Field2 { get; set; }
+		}
+		public class MapIgnoreInsertDbo
+		{
+			public int Field1 { get; set; }
+			public int Field2 { get; set; }
+		}
+		public class MapIgnoreSelectDbo
+		{
+			public int Field1 { get; set; }
+			public int Field2 { get; set; }
+		}
+		public class TrimmableDbo
+		{
+			public string Field1 { get; set; }
 		}
 	}
 }

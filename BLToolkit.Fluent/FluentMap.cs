@@ -109,7 +109,7 @@ namespace BLToolkit.Fluent
 		public FluentMap<T> NonUpdatable<TR>(Expression<Func<T, TR>> prop)
 		{
 			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.NonUpdatable, Convert.ToString(true));
+			member.Attributes.Add(Attributes.NonUpdatable, ToString(true));
 			return this;
 
 		}
@@ -123,7 +123,7 @@ namespace BLToolkit.Fluent
 		public FluentMap<T> Identity<TR>(Expression<Func<T, TR>> prop)
 		{
 			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.Identity, Convert.ToString(true));
+			member.Attributes.Add(Attributes.Identity, ToString(true));
 			return this;
 
 		}
@@ -138,7 +138,36 @@ namespace BLToolkit.Fluent
 		public FluentMap<T> SqlIgnore<TR>(Expression<Func<T, TR>> prop, bool ignore = true)
 		{
 			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.SqlIgnore.Ignore, Convert.ToString(ignore));
+			member.Attributes.Add(Attributes.SqlIgnore.Ignore, ToString(ignore));
+			return this;
+
+		}
+
+		/// <summary>
+		/// MapIgnoreAttribute
+		/// </summary>
+		/// <typeparam name="TR"></typeparam>
+		/// <param name="prop"></param>
+		/// <param name="ignore"></param>
+		/// <returns></returns>
+		public FluentMap<T> MapIgnore<TR>(Expression<Func<T, TR>> prop, bool ignore = true)
+		{
+			var member = GetMemberExtension(prop);
+			member.Attributes.Add(Attributes.MapIgnore.Ignore, ToString(ignore));
+			return this;
+
+		}
+
+		/// <summary>
+		/// TrimmableAttribute
+		/// </summary>
+		/// <typeparam name="TR"></typeparam>
+		/// <param name="prop"></param>
+		/// <returns></returns>
+		public FluentMap<T> Trimmable<TR>(Expression<Func<T, TR>> prop)
+		{
+			var member = GetMemberExtension(prop);
+			member.Attributes.Add(Attributes.Trimmable, ToString(true));
 			return this;
 
 		}
@@ -206,6 +235,11 @@ namespace BLToolkit.Fluent
 				_typeExtension.Members.Add(member);
 			}
 			return member;
+		}
+
+		private string ToString(bool value)
+		{
+			return Convert.ToString(value);
 		}
 	}
 }

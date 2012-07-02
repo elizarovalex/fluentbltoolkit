@@ -48,6 +48,7 @@
     <Reference Include="System.Data.SQLite">
       <HintPath>.\System.Data.SQLite.DLL</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
@@ -57,6 +58,14 @@
   <ItemGroup>
     <Compile Include="AssertEx.cs" />
     <Compile Include="FluentMapTest.cs" />
+    <Compile Include="MockDataBase\DbConnection.cs" />
+    <Compile Include="MockDataBase\MockDbDataParameter.cs" />
+    <Compile Include="MockDataBase\MockCommand.cs" />
+    <Compile Include="MockDataBase\MockCommandData.cs" />
+    <Compile Include="MockDataBase\MockDataProvider.cs" />
+    <Compile Include="MockDataBase\MockDb.cs" />
+    <Compile Include="MockDataBase\MockReader.cs" />
+    <Compile Include="MockDataBase\MockReaderData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

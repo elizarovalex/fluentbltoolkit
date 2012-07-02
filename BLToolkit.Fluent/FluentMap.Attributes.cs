@@ -28,8 +28,13 @@
 			{
 				public const string Ignore = "SqlIgnore";
 			}
+			public static class MapIgnore
+			{
+				public const string Ignore = "MapIgnore";
+			}
 			public const string NonUpdatable = "NonUpdatable";
 			public const string Identity = "Identity";
+			public const string Trimmable = "Trimmable";
 		}
 	}
 }
