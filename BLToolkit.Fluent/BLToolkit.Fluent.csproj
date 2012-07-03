@@ -51,7 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="bltoolkit\BLToolkit.4.dll" />
-    <Content Include="bltoolkit\DataProviders\BLToolkit.Data.DataProvider.SQLite.4.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FluentMap.Attributes.cs" />
