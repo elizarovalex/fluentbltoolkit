@@ -2,14 +2,20 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BLToolkit.Fluent.Test.MockDataBase
 {
 	public partial class MockDb
 	{
+		/// <summary>
+		/// IDbCommand
+		/// </summary>
 		private partial class MockCommand : IDbCommand
 		{
 			private readonly MockDb _db;
+			private readonly Regex _findTableRx = new Regex(MockSqlProvider.TableMarker + @"(\w+)");
+			private readonly Regex _findFieldRx = new Regex(MockSqlProvider.FieldMarker + @"(\w+)");
 
 			public MockCommand(MockDb db)
 			{
@@ -70,11 +76,38 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 			private MockCommandData MockCommandData(bool isUsing = true)
 			{
+				List<string> fields;
+				List<string> tables;
+				FindFields(CommandText, out fields);
+				FindTables(CommandText, out tables);
+				CommandText = ClearMockMarkers(CommandText);
+
 				var cmd = _db.NextCommand();
-				cmd.Parameters = Parameters.Cast<MockDbDataParameter>().ToList();
 				cmd.CommandText = CommandText;
+				cmd.Parameters = Parameters.Cast<MockDbDataParameter>().ToList();
+				cmd.Fields = fields;
+				cmd.Tables = tables;
 				cmd.IsUsing = isUsing;
 				return cmd;
+			}
+
+			private string ClearMockMarkers(string commandText)
+			{
+				return commandText
+					.Replace(MockSqlProvider.FieldMarker, "")
+					.Replace(MockSqlProvider.TableMarker, "");
+			}
+
+			private void FindTables(string commandText, out List<string> tables)
+			{
+				tables = (from Match match in _findTableRx.Matches(commandText) select match.Groups[1].Value)
+					.Distinct().ToList();
+			}
+
+			private void FindFields(string commandText, out List<string> fields)
+			{
+				fields = (from Match match in _findFieldRx.Matches(commandText) select match.Groups[1].Value)
+					.Distinct().ToList();
 			}
 
 			private class DataParameterCollection : List<MockDbDataParameter>, IDataParameterCollection

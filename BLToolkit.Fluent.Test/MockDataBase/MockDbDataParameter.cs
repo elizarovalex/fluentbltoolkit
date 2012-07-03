@@ -2,6 +2,9 @@
 
 namespace BLToolkit.Fluent.Test.MockDataBase
 {
+	/// <summary>
+	/// IDbDataParameter
+	/// </summary>
 	public class MockDbDataParameter : IDbDataParameter
 	{
 		public DbType DbType { get; set; }

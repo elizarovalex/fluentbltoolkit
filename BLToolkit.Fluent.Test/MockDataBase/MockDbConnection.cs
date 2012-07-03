@@ -2,6 +2,9 @@
 
 namespace BLToolkit.Fluent.Test.MockDataBase
 {
+	/// <summary>
+	/// IDbConnection
+	/// </summary>
 	public partial class MockDb : IDbConnection
 	{
 		private ConnectionState _state;

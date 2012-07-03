@@ -8,6 +8,9 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 	{
 		private partial class MockCommand : IDbCommand
 		{
+			/// <summary>
+			/// IDataReader
+			/// </summary>
 			private class MockReader : IDataReader
 			{
 				private readonly MockReaderData _data;

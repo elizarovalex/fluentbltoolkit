@@ -6,6 +6,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BLToolkit.Fluent.Test.MockDataBase
 {
+	/// <summary>
+	/// DB configure start point
+	/// </summary>
 	public partial class MockDb : IDbConnection
 	{
 		private int _cmdIndex = -1;
@@ -35,14 +38,6 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 		{
 			CurrentSetupCommandData.ReaderResult.Values.Add(values);
 			return this;
-		}
-
-		public void Verify(string msg)
-		{
-			if (_commands.Any(c => !c.IsUsing))
-			{
-				Assert.Fail(msg);
-			}
 		}
 
 		private MockCommandData CurrentSetupCommandData

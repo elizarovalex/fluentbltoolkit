@@ -6,6 +6,9 @@ using BLToolkit.Data.Sql.SqlProvider;
 
 namespace BLToolkit.Fluent.Test.MockDataBase
 {
+	/// <summary>
+	/// For BLToolkit
+	/// </summary>
 	public class MockDataProvider : DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject()
@@ -25,7 +28,7 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 		public override ISqlProvider CreateSqlProvider()
 		{
-			return new AccessSqlProvider();
+			return new MockSqlProvider();
 		}
 
 		public override Type ConnectionType

@@ -6,7 +6,7 @@ namespace BLToolkit.Fluent.Test
     /// <summary>
     /// Класс для работы с асертами обладающий дополнительными методами
     /// </summary>
-    public static class AssertEx
+    public static class AssertExceptionEx
     {
         /// <summary>
         /// Проверка на обязательность исключения
