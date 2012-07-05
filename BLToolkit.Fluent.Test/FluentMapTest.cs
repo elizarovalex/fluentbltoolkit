@@ -108,7 +108,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<PrimaryKeyDbo>()
-					.PrimaryKey(_ => _.Field2)
+					.MapField(_ => _.Field2).PrimaryKey()
 					.MapTo(db);
 
 				// when
@@ -136,7 +136,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<NonUpdatableDbo>()
-					.NonUpdatable(_ => _.Field1)
+					.MapField(_ => _.Field1).NonUpdatable()
 					.MapTo(db);
 
 				// when
@@ -162,7 +162,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<SqlIgnoreInsertDbo>()
-					.SqlIgnore(_ => _.Field2)
+					.MapField(_ => _.Field2).SqlIgnore()
 					.MapTo(db);
 
 				// when / then
@@ -194,7 +194,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<SqlIgnoreSelectDbo>()
-					.SqlIgnore(_ => _.Field2)
+					.MapField(_ => _.Field2).SqlIgnore()
 					.MapTo(db);
 
 				var table = db.GetTable<SqlIgnoreSelectDbo>();
@@ -223,7 +223,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<MapIgnoreInsertDbo>()
-					.MapIgnore(_ => _.Field2)
+					.MapField(_ => _.Field2).MapIgnore()
 					.MapTo(db);
 
 				// when / then
@@ -256,7 +256,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<MapIgnoreSelectDbo>()
-					.MapIgnore(_ => _.Field2)
+					.MapField(_ => _.Field2).MapIgnore()
 					.MapTo(db);
 
 				var table = db.GetTable<MapIgnoreSelectDbo>();
@@ -286,7 +286,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<TrimmableDbo>()
-					.Trimmable(_ => _.Field1)
+					.MapField(_ => _.Field1).Trimmable()
 					.MapTo(db);
 
 				var table = db.GetTable<TrimmableDbo>();
@@ -316,10 +316,12 @@ namespace BLToolkit.Fluent.Test
 #warning bug for maping TO db
 				// fluent config
 				new FluentMap<MapValueMemberDbo>()
-					.MapValue(_ => _.Field1, "result true", true)
-					.MapValue(_ => _.Field1, "result false", false)
-					.MapValue(_ => _.Field2, "value true", true)
-					.MapValue(_ => _.Field2, "value false", false)
+					.MapField(_ => _.Field1)
+						.MapValue("result true", true)
+						.MapValue("result false", false)
+					.MapField(_ => _.Field2)
+						.MapValue("value true", true)
+						.MapValue("value false", false)
 					.MapTo(db);
 
 				var table = db.GetTable<MapValueMemberDbo>();
@@ -498,8 +500,8 @@ namespace BLToolkit.Fluent.Test
 				// fluent config
 				new FluentMap<AssociationThis1Dbo>()
 					.MapField(_ => _.FieldThis1, "ThisId")
-					.Association(_ => _.FieldThis2, _ => _.FieldThis1)
-						.ToMany((AssociationOtherDbo _) => _.FieldOther2)
+					.MapField(_ => _.FieldThis2)
+						.Association(_ => _.FieldThis1).ToMany((AssociationOtherDbo _) => _.FieldOther2)
 					.MapTo(db);
 
 				var table = db.GetTable<AssociationThis1Dbo>();
@@ -536,8 +538,8 @@ namespace BLToolkit.Fluent.Test
 				// fluent config
 				new FluentMap<AssociationThis2Dbo>()
 					.MapField(_ => _.FieldThis1, "ThisId")
-					.Association(_ => _.FieldThis3, _ => _.FieldThis1)
-						.ToOne(_ => _.FieldOther3)
+					.MapField(_ => _.FieldThis3)
+						.Association(_ => _.FieldThis1).ToOne(_ => _.FieldOther3)
 					.MapTo(db);
 
 				var table = db.GetTable<AssociationThis2Dbo>();
@@ -596,22 +598,19 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<Parent>()
-					.MapField(_ => _.ID, "ParentID")
-					.PrimaryKey(_ => _.ID)
-					.Relation(_ => _.Children)
+					.MapField(_ => _.ID, "ParentID").PrimaryKey()
+					.MapField(_ => _.Children).Relation()
 					.MapTo(db);
 				new FluentMap<Child>()
-					.MapField(_ => _.ID, "ChildID")
 					.MapField(_ => _.Parent.ID, "ParentID")
-					.PrimaryKey(_ => _.ID)
-					.Relation(_ => _.Parent)
-					.Relation(_ => _.Grandchildren)
+					.MapField(_ => _.ID, "ChildID").PrimaryKey()
+					.MapField(_ => _.Parent).Relation()
+					.MapField(_ => _.Grandchildren).Relation()
 					.MapTo(db);
 				new FluentMap<Grandchild>()
-					.MapField(_ => _.ID, "GrandchildID")
 					.MapField(_ => _.Child.ID, "ChildID")
-					.PrimaryKey(_ => _.ID)
-					.Relation(_ => _.Child)
+					.MapField(_ => _.ID, "GrandchildID").PrimaryKey()
+					.MapField(_ => _.Child).Relation()
 					.MapTo(db);
 
 				// when

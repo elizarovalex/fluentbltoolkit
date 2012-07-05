@@ -48,6 +48,7 @@
     <Compile Include="FluentConfig.cs" />
     <Compile Include="FluentMap.cs" />
     <Compile Include="IFluentMap.cs" />
+    <Compile Include="MapFieldMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

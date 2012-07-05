@@ -6,7 +6,7 @@
 	/// <typeparam name="T"></typeparam>
 	public partial class FluentMap<T>
 	{
-		private static class Attributes
+		protected static class Attributes
 		{
 			public static class TableName
 			{

@@ -10,12 +10,12 @@ namespace BLToolkit.Fluent
 	{
 		public class AssociationMap<TR, TRt>
 		{
-			private readonly FluentMap<T> _owner;
+			private readonly MapFieldMap<T, TR> _owner;
 			private readonly Expression<Func<T, TR>> _prop;
 			private readonly bool _canBeNull;
 			private readonly List<Expression<Func<T, TRt>>> _thisKeys;
 
-			public AssociationMap(FluentMap<T> owner, Expression<Func<T, TR>> prop, bool canBeNull, List<Expression<Func<T, TRt>>> thisKeys)
+			public AssociationMap(MapFieldMap<T, TR> owner, Expression<Func<T, TR>> prop, bool canBeNull, List<Expression<Func<T, TRt>>> thisKeys)
 			{
 				_owner = owner;
 				_prop = prop;
@@ -23,21 +23,21 @@ namespace BLToolkit.Fluent
 				_thisKeys = thisKeys;
 			}
 
-			public FluentMap<T> ToMany<TRf, TRo>(Expression<Func<TRf, TRo>> otherKey, params Expression<Func<TRf, TRo>>[] otherKeys)
+			public MapFieldMap<T, TR> ToMany<TRf, TRo>(Expression<Func<TRf, TRo>> otherKey, params Expression<Func<TRf, TRo>>[] otherKeys)
 			{
 				var keys = new List<Expression<Func<TRf, TRo>>>(otherKeys);
 				keys.Insert(0, otherKey);
 				return Association(keys);
 			}
 
-			public FluentMap<T> ToOne<TRo>(Expression<Func<TR, TRo>> otherKey, params Expression<Func<TR, TRo>>[] otherKeys)
+			public MapFieldMap<T, TR> ToOne<TRo>(Expression<Func<TR, TRo>> otherKey, params Expression<Func<TR, TRo>>[] otherKeys)
 			{
 				var keys = new List<Expression<Func<TR, TRo>>>(otherKeys);
 				keys.Insert(0, otherKey);
 				return Association(keys);
 			}
 
-			private FluentMap<T> Association<TRf, TRo>(List<Expression<Func<TRf, TRo>>> otherKeys)
+			private MapFieldMap<T, TR> Association<TRf, TRo>(IEnumerable<Expression<Func<TRf, TRo>>> otherKeys)
 			{
 				var member = _owner.GetMemberExtension(_prop);
 				AttributeExtensionCollection attrs;
@@ -52,7 +52,7 @@ namespace BLToolkit.Fluent
 				attributeExtension.Values.Add(Attributes.Association.OtherKey, KeysToString(otherKeys));
 				attributeExtension.Values.Add(Attributes.Association.Storage, _owner.ToString(_canBeNull));
 				attrs.Add(attributeExtension);
-				return _owner;
+				return  _owner;
 			}
 
 			/// <summary>
