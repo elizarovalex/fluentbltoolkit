@@ -15,6 +15,7 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 			{
 				private readonly MockReaderData _data;
 				private int _rowIndex = -1;
+				private int _resultIndex = 0;
 				private MockCommandData _cmd;
 
 				public MockReader(MockCommandData data)
@@ -29,7 +30,7 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 				public string GetName(int i)
 				{
-					return _data.Names[i];
+					return _data.Results[_resultIndex].Names[i];
 				}
 
 				public string GetDataTypeName(int i)
@@ -39,10 +40,10 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 				public Type GetFieldType(int i)
 				{
-					Type type = _data.Types[i];
+					Type type = _data.Results[_resultIndex].Types[i];
 					if (null == type)
 					{
-						object o = _data.Values.First()[i];
+						object o = _data.Results[_resultIndex].Values.First()[i];
 						if (null == o)
 						{
 							throw new ArgumentException();
@@ -54,13 +55,13 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 				public object GetValue(int i)
 				{
-					return _data.Values[_rowIndex][i];
+					return _data.Results[_resultIndex].Values[_rowIndex][i];
 				}
 
 				public int GetValues(object[] values)
 				{
-					_data.Values[_rowIndex].CopyTo(values, 0);
-					return Math.Min(_data.Values[_rowIndex].Length, values.Length);
+					_data.Results[_resultIndex].Values[_rowIndex].CopyTo(values, 0);
+					return Math.Min(_data.Results[_resultIndex].Values[_rowIndex].Length, values.Length);
 				}
 
 				public int GetOrdinal(string name)
@@ -70,13 +71,13 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 				public bool GetBoolean(int i)
 				{
-					return Convert.ToBoolean(_data.Values[_rowIndex][i]);
+					return Convert.ToBoolean(_data.Results[_resultIndex].Values[_rowIndex][i]);
 				}
 
 				public byte GetByte(int i)
 				{
-					return Convert.ToByte(_data.Values[_rowIndex][i]);
- 				}
+					return Convert.ToByte(_data.Results[_resultIndex].Values[_rowIndex][i]);
+				}
 
 				public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 				{
@@ -85,7 +86,7 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 				public char GetChar(int i)
 				{
-					return Convert.ToChar(_data.Values[_rowIndex][i]);
+					return Convert.ToChar(_data.Results[_resultIndex].Values[_rowIndex][i]);
 				}
 
 				public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
@@ -100,17 +101,17 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 				public short GetInt16(int i)
 				{
-					return Convert.ToInt16(_data.Values[_rowIndex][i]);
+					return Convert.ToInt16(_data.Results[_resultIndex].Values[_rowIndex][i]);
 				}
 
 				public int GetInt32(int i)
 				{
-					return Convert.ToInt32(_data.Values[_rowIndex][i]);
+					return Convert.ToInt32(_data.Results[_resultIndex].Values[_rowIndex][i]);
 				}
 
 				public long GetInt64(int i)
 				{
-					return Convert.ToInt64(_data.Values[_rowIndex][i]);
+					return Convert.ToInt64(_data.Results[_resultIndex].Values[_rowIndex][i]);
 				}
 
 				public float GetFloat(int i)
@@ -120,22 +121,22 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 				public double GetDouble(int i)
 				{
-					return Convert.ToDouble(_data.Values[_rowIndex][i]);
+					return Convert.ToDouble(_data.Results[_resultIndex].Values[_rowIndex][i]);
 				}
 
 				public string GetString(int i)
 				{
-					return Convert.ToString(_data.Values[_rowIndex][i]);
+					return Convert.ToString(_data.Results[_resultIndex].Values[_rowIndex][i]);
 				}
 
 				public decimal GetDecimal(int i)
 				{
-					return Convert.ToDecimal(_data.Values[_rowIndex][i]);
+					return Convert.ToDecimal(_data.Results[_resultIndex].Values[_rowIndex][i]);
 				}
 
 				public DateTime GetDateTime(int i)
 				{
-					return Convert.ToDateTime(_data.Values[_rowIndex][i]);
+					return Convert.ToDateTime(_data.Results[_resultIndex].Values[_rowIndex][i]);
 				}
 
 				public IDataReader GetData(int i)
@@ -145,12 +146,12 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 				public bool IsDBNull(int i)
 				{
-					return null == _data.Values[_rowIndex][i];
+					return null == _data.Results[_resultIndex].Values[_rowIndex][i];
 				}
 
 				public int FieldCount
 				{
-					get { return _data.Names.Count; }
+					get { return _data.Results[_resultIndex].Names.Count; }
 				}
 
 				object IDataRecord.this[int i]
@@ -175,15 +176,16 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 				public bool NextResult()
 				{
-					var index = _rowIndex + 1;
-					return _data.Values.Count > index;
+					_rowIndex = -1;
+					_resultIndex += 1;
+					return _data.Results.Count > _resultIndex;
 				}
 
 				public bool Read()
 				{
 					_cmd.IsUsing = true;
 					_rowIndex++;
-					return _data.Values.Count > _rowIndex;
+					return _data.Results[_resultIndex].Values.Count > _rowIndex;
 				}
 
 				public int Depth

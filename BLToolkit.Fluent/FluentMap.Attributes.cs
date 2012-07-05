@@ -16,9 +16,11 @@
 			}
 			public static class MapField
 			{
-				public const string MapName = "MapField";
+				public const string Name = "MapField";
 				public const string Storage = "FieldStorage";
 				public const string IsInheritanceDiscriminator = "IsInheritanceDiscriminator";
+				public const string OrigName = "OrigName";
+				public const string MapName = "MapName";
 			}
 			public static class PrimaryKey
 			{
@@ -32,9 +34,33 @@
 			{
 				public const string Ignore = "MapIgnore";
 			}
+			public static class MapValue
+			{
+				public const string Name = "MapValue";
+				public const string OrigValue = "OrigValue";
+			}
+			public static class Nullable
+			{
+				public const string IsNullable = "Nullable";
+			}
+			public static class InheritanceMapping
+			{
+				public const string Name = "InheritanceMapping";
+				public const string Code = "Code";
+				public const string IsDefault = "IsDefault";
+				public const string Type = "Type";
+			}
+			public static class Association
+			{
+				public const string ThisKey = "ThisKey";
+				public const string OtherKey = "OtherKey";
+				public const string Storage = "Storage";
+			}
 			public const string NonUpdatable = "NonUpdatable";
 			public const string Identity = "Identity";
 			public const string Trimmable = "Trimmable";
+			public const string DefaultValue = "DefaultValue";
+			public const string NullValue = "NullValue";
 		}
 	}
 }

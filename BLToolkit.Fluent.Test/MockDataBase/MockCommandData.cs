@@ -16,7 +16,7 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 		public List<MockDbDataParameter> Parameters { get; set; }
 
-		public List<string> Fields { get; set; }
+		public Dictionary<string, int> Fields { get; set; }
 
 		public List<string> Tables { get; set; }
 	}

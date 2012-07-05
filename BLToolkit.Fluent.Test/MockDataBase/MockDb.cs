@@ -26,17 +26,33 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 			return _commands[_cmdIndex];
 		}
 
+		/// <summary>
+		/// New IDataReader query
+		/// </summary>
+		/// <param name="fields"></param>
+		/// <returns></returns>
 		public MockDb NewReader(params string[] fields)
 		{
-			var data = new MockReaderData();
+			CurrentSetupCommandData = new MockCommandData { ReaderResult = new MockReaderData() };
+			return NextResult(fields);
+		}
+
+		/// <summary>
+		/// Next result into current IDataReader context
+		/// </summary>
+		/// <param name="fields"></param>
+		/// <returns></returns>
+		public MockDb NextResult(params string[] fields)
+		{
+			var data = new MockReaderResultData();
 			data.SetNames(fields);
-			CurrentSetupCommandData = new MockCommandData { ReaderResult = data };
+			CurrentSetupCommandData.ReaderResult.CurrentResult = data;
 			return this;
 		}
 
 		public MockDb NewRow(params object[] values)
 		{
-			CurrentSetupCommandData.ReaderResult.Values.Add(values);
+			CurrentSetupCommandData.ReaderResult.CurrentResult.Values.Add(values);
 			return this;
 		}
 

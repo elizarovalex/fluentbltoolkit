@@ -33,7 +33,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BLToolkit.4">
+    <Reference Include="BLToolkit.4, Version=4.1.9.2120, Culture=neutral, PublicKeyToken=b1d3f6ab3aadaca3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\BLToolkit.Fluent\bltoolkit\BLToolkit.4.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
@@ -63,6 +64,7 @@
     <Compile Include="MockDataBase\MockDb.cs" />
     <Compile Include="MockDataBase\MockReader.cs" />
     <Compile Include="MockDataBase\MockReaderData.cs" />
+    <Compile Include="MockDataBase\MockReaderResultData.cs" />
     <Compile Include="MockDataBase\MockSqlProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

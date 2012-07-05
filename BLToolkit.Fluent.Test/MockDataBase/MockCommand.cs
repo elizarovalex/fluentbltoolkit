@@ -76,7 +76,7 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 
 			private MockCommandData MockCommandData(bool isUsing = true)
 			{
-				List<string> fields;
+				Dictionary<string, int> fields;
 				List<string> tables;
 				FindFields(CommandText, out fields);
 				FindTables(CommandText, out tables);
@@ -104,10 +104,11 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 					.Distinct().ToList();
 			}
 
-			private void FindFields(string commandText, out List<string> fields)
+			private void FindFields(string commandText, out Dictionary<string, int> fields)
 			{
 				fields = (from Match match in _findFieldRx.Matches(commandText) select match.Groups[1].Value)
-					.Distinct().ToList();
+					.GroupBy(s => s, (s, ss) => new { Key = s, Value = ss.Count() })
+					.ToDictionary(kv => kv.Key, kv => kv.Value);
 			}
 
 			private class DataParameterCollection : List<MockDbDataParameter>, IDataParameterCollection

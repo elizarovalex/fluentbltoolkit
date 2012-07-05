@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssociationMap.cs" />
     <Compile Include="FluentConfig.cs" />
     <Compile Include="FluentMap.cs" />
     <Compile Include="IFluentMap.cs" />
