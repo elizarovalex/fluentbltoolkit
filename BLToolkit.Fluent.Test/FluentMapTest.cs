@@ -1058,31 +1058,6 @@ namespace BLToolkit.Fluent.Test
 			}
 		}
 
-		[TestMethod]
-		public void Test()
-		{
-			// db config
-			var conn = new MockDb()
-				.NewReader("Prop")
-					.NewRow(1);
-
-			using (conn)
-			using (var db = new DbManager(conn))
-			{
-				db.GetTable<Table2>().Select(t => t).ToArray();
-			}
-		}
-
-		[TableName("ttt")]
-		public class Table1
-		{
-			public int Prop { get; set; }
-		}
-
-		public class Table2 : Table1
-		{
-		}
-
 		#region Dbo
 		public class TableNameDbo
 		{
