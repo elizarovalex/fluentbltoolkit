@@ -108,7 +108,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<PrimaryKeyDbo>()
-					.MapField(_ => _.Field2).PrimaryKey()
+					.PrimaryKey(_ => _.Field2)
 					.MapTo(db);
 
 				// when
@@ -136,7 +136,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<NonUpdatableDbo>()
-					.MapField(_ => _.Field1).NonUpdatable()
+					.NonUpdatable(_ => _.Field1)
 					.MapTo(db);
 
 				// when
@@ -162,7 +162,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<SqlIgnoreInsertDbo>()
-					.MapField(_ => _.Field2).SqlIgnore()
+					.SqlIgnore(_ => _.Field2)
 					.MapTo(db);
 
 				// when / then
@@ -194,7 +194,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<SqlIgnoreSelectDbo>()
-					.MapField(_ => _.Field2).SqlIgnore()
+					.SqlIgnore(_ => _.Field2)
 					.MapTo(db);
 
 				var table = db.GetTable<SqlIgnoreSelectDbo>();
@@ -223,7 +223,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<MapIgnoreInsertDbo>()
-					.MapField(_ => _.Field2).MapIgnore()
+					.MapIgnore(_ => _.Field2)
 					.MapTo(db);
 
 				// when / then
@@ -256,7 +256,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<MapIgnoreSelectDbo>()
-					.MapField(_ => _.Field2).MapIgnore()
+					.MapIgnore(_ => _.Field2)
 					.MapTo(db);
 
 				var table = db.GetTable<MapIgnoreSelectDbo>();
@@ -286,7 +286,7 @@ namespace BLToolkit.Fluent.Test
 			{
 				// fluent config
 				new FluentMap<TrimmableDbo>()
-					.MapField(_ => _.Field1).Trimmable()
+					.Trimmable(_ => _.Field1)
 					.MapTo(db);
 
 				var table = db.GetTable<TrimmableDbo>();

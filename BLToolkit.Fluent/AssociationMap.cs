@@ -11,14 +11,12 @@ namespace BLToolkit.Fluent
 		public class AssociationMap<TR, TRt>
 		{
 			private readonly MapFieldMap<T, TR> _owner;
-			private readonly Expression<Func<T, TR>> _prop;
 			private readonly bool _canBeNull;
 			private readonly List<Expression<Func<T, TRt>>> _thisKeys;
 
-			public AssociationMap(MapFieldMap<T, TR> owner, Expression<Func<T, TR>> prop, bool canBeNull, List<Expression<Func<T, TRt>>> thisKeys)
+			public AssociationMap(MapFieldMap<T, TR> owner, bool canBeNull, List<Expression<Func<T, TRt>>> thisKeys)
 			{
 				_owner = owner;
-				_prop = prop;
 				_canBeNull = canBeNull;
 				_thisKeys = thisKeys;
 			}
@@ -39,7 +37,7 @@ namespace BLToolkit.Fluent
 
 			private MapFieldMap<T, TR> Association<TRf, TRo>(IEnumerable<Expression<Func<TRf, TRo>>> otherKeys)
 			{
-				var member = _owner.GetMemberExtension(_prop);
+				var member = _owner.GetMemberExtension(_owner.Prop);
 				AttributeExtensionCollection attrs;
 				if (!member.Attributes.TryGetValue(TypeExtension.NodeName.Association, out attrs))
 				{
