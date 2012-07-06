@@ -10,88 +10,95 @@ using BLToolkit.Reflection.Extension;
 namespace BLToolkit.Fluent
 {
 	/// <summary>
-	/// Конфигуратор инфраструктур BLToolkit для поддержки fluent настройки мапинга
+	/// Configure BLToolkit in fluent style
 	/// </summary>
 	public static class FluentConfig
 	{
-		private static Dictionary<Assembly, List<TypeExtension>> _hash = new Dictionary<Assembly, List<TypeExtension>>();
+		private static Dictionary<Assembly, ExtensionList> _hash = new Dictionary<Assembly, ExtensionList>();
 
 		/// <summary>
-		/// Получить настройки мапинга из сборки содержащей указанный тип
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public static IEnumerable<TypeExtension> GetMapingFromAssemblyOf<T>()
-		{
-			return GetMapingFromAssembly(typeof(T).Assembly);
-		}
-
-		/// <summary>
-		/// Получить настройки мапинга из указанной сборки
-		/// </summary>
-		/// <param name="assembly"></param>
-		/// <returns></returns>
-		public static IEnumerable<TypeExtension> GetMapingFromAssembly(Assembly assembly)
-		{
-			List<TypeExtension> res;
-			if (!_hash.TryGetValue(assembly, out res))
-			{
-				res = new List<TypeExtension>();
-				_hash.Add(assembly, res);
-
-				string fluentType = typeof(IFluentMap).FullName;
-				res.AddRange(from type in assembly.GetTypes()
-							 where type.IsClass && !type.IsAbstract
-							 && (null != type.GetInterface(fluentType)) // Реализован нужный интерфейс
-							 && (null != type.GetConstructor(new Type[0])) // Есть конструктор без параметров
-							 select ((IFluentMap)Activator.CreateInstance(type)).Map());
-			}
-			return res;
-		}
-
-		/// <summary>
-		/// Сконфигурировать DbManager
+		/// Configure DbManager
 		/// </summary>
 		/// <param name="dbManager"></param>
-		/// <param name="extensions"></param>
-		public static void Configure(DbManager dbManager, IEnumerable<TypeExtension> extensions)
+		public static MappingConfigurator Configure(DbManager dbManager)
 		{
 			MappingSchema mappingSchema = dbManager.MappingSchema ?? (dbManager.MappingSchema = Map.DefaultSchema);
-			Configure(mappingSchema, extensions);
+			return Configure(mappingSchema);
 		}
 
 		/// <summary>
-		/// Сконфигурировать DataProvider
+		/// Configure DataProvider
 		/// </summary>
 		/// <param name="dataProvider"></param>
-		/// <param name="extensions"></param>
-		public static void Configure(DataProviderBase dataProvider, IEnumerable<TypeExtension> extensions)
+		public static MappingConfigurator Configure(DataProviderBase dataProvider)
 		{
 			MappingSchema mappingSchema = dataProvider.MappingSchema ?? (dataProvider.MappingSchema = Map.DefaultSchema);
-			Configure(mappingSchema, extensions);
+			return Configure(mappingSchema);
 		}
 
 		/// <summary>
-		/// Сконфигурировать MappingSchema
+		/// Configure MappingSchema
 		/// </summary>
 		/// <param name="mappingSchema"></param>
-		/// <param name="extensions"></param>
-		public static void Configure(MappingSchema mappingSchema, IEnumerable<TypeExtension> extensions)
+		public static MappingConfigurator Configure(MappingSchema mappingSchema)
 		{
 			ExtensionList extensionList = mappingSchema.Extensions ?? (mappingSchema.Extensions = new ExtensionList());
-			Configure(extensionList, extensions);
+			return Configure(extensionList);
 		}
 
 		/// <summary>
-		/// Сконфигурировать ExtensionList
+		/// Configure ExtensionList
 		/// </summary>
 		/// <param name="extensionList"></param>
-		/// <param name="extensions"></param>
-		public static void Configure(ExtensionList extensionList, IEnumerable<TypeExtension> extensions)
+		public static MappingConfigurator Configure(ExtensionList extensionList)
 		{
-			foreach (TypeExtension typeExtension in extensions)
+			return new MappingConfigurator(extensionList);
+		}
+
+		public class MappingConfigurator
+		{
+			private ExtensionList _extensions;
+
+			public MappingConfigurator(ExtensionList extensions)
 			{
-				extensionList.Add(typeExtension);
+				_extensions = extensions;
+			}
+
+			/// <summary>
+			/// Mapping from assembly contains type
+			/// </summary>
+			/// <typeparam name="T"></typeparam>
+			/// <returns></returns>
+			public void MapingFromAssemblyOf<T>()
+			{
+				MapingFromAssembly(typeof(T).Assembly);
+			}
+
+			/// <summary>
+			/// Mapping from assembly
+			/// </summary>
+			/// <param name="assembly"></param>
+			/// <returns></returns>
+			public void MapingFromAssembly(Assembly assembly)
+			{
+				ExtensionList res;
+				if (!_hash.TryGetValue(assembly, out res))
+				{
+					res = new ExtensionList();
+					_hash.Add(assembly, res);
+
+					string fluentType = typeof(IFluentMap).FullName;
+					var maps = from type in assembly.GetTypes()
+							   where type.IsClass && !type.IsAbstract && !type.IsGenericType
+									 && (null != type.GetInterface(fluentType)) // Is IFluentMap
+									 && (null != type.GetConstructor(new Type[0])) // Is defaut ctor
+							   select (IFluentMap)Activator.CreateInstance(type);
+					foreach (var fluentMap in maps)
+					{
+						fluentMap.MapTo(res);
+					}
+				}
+				FluentMapHelper.MergeExtensions(res, ref _extensions);
 			}
 		}
 	}

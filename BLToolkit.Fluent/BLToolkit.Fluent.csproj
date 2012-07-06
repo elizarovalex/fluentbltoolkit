@@ -45,17 +45,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssociationMap.cs" />
-    <Compile Include="FluentConfig.cs" />
+    <Compile Include="Attributes.cs" />
     <Compile Include="FluentMap.cs" />
+    <Compile Include="FluentMap.Interface.cs" />
+    <Compile Include="FluentConfig.cs" />
+    <Compile Include="FluentMapHelper.cs" />
     <Compile Include="IFluentMap.cs" />
     <Compile Include="MapFieldMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bltoolkit\BLToolkit.4.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="FluentMap.Attributes.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

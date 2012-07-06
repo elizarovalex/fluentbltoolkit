@@ -15,16 +15,17 @@ namespace BLToolkit.Fluent
 	/// FluentSettings
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public partial class FluentMap<T> : IFluentMap
+	public partial class FluentMap<T>
 	{
 		private readonly TypeExtension _typeExtension;
+		private List<IFluentMap> _childs;
 		private const string MemberNameSeparator = ".";
 
 		/// <summary>
 		/// ctor
 		/// </summary>
 		public FluentMap()
-			: this(new TypeExtension { Name = typeof(T).FullName })
+			: this(new TypeExtension { Name = typeof(T).FullName }, null)
 		{
 		}
 
@@ -32,9 +33,11 @@ namespace BLToolkit.Fluent
 		/// ctor
 		/// </summary>
 		/// <param name="typeExtension"></param>
-		protected FluentMap(TypeExtension typeExtension)
+		/// <param name="childs"></param>
+		protected FluentMap(TypeExtension typeExtension, List<IFluentMap> childs)
 		{
 			_typeExtension = typeExtension;
+			_childs = childs;
 		}
 
 		/// <summary>
@@ -44,8 +47,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public FluentMap<T> TableName(string name)
 		{
-			_typeExtension.Attributes.Add(Attributes.TableName.Name, name);
-			return this;
+			return TableName(null, null, name);
 		}
 
 		/// <summary>
@@ -56,9 +58,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public FluentMap<T> TableName(string database, string name)
 		{
-			TableName(name);
-			_typeExtension.Attributes.Add(Attributes.TableName.Database, database);
-			return this;
+			return TableName(database, null, name);
 		}
 
 		/// <summary>
@@ -70,8 +70,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public FluentMap<T> TableName(string database, string owner, string name)
 		{
-			TableName(database, name);
-			_typeExtension.Attributes.Add(Attributes.TableName.Owner, owner);
+			((IFluentMap)this).TableName(database, owner, name);
 			return this;
 		}
 
@@ -99,15 +98,8 @@ namespace BLToolkit.Fluent
 		public MapFieldMap<T, TR> MapField<TR>(Expression<Func<T, TR>> prop, string mapName = null, string storage = null, bool? isInheritanceDiscriminator = null)
 		{
 			string name = GetExprName(prop);
-			if (name.Contains(MemberNameSeparator))
-			{
-				MapFieldOnType(name, mapName);
-			}
-			else
-			{
-				MapFieldOnField(name, mapName, storage, isInheritanceDiscriminator);
-			}
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			((IFluentMap)this).MapField(name, mapName, storage, isInheritanceDiscriminator);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		private void MapFieldOnType(string origName, string mapName)
@@ -150,9 +142,9 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> PrimaryKey<TR>(Expression<Func<T, TR>> prop, int order = -1)
 		{
-			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.PrimaryKey.Order, Convert.ToString(order));
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			string name = GetExprName(prop);
+			((IFluentMap)this).PrimaryKey(name, order);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		/// <summary>
@@ -161,9 +153,9 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> NonUpdatable<TR>(Expression<Func<T, TR>> prop)
 		{
-			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.NonUpdatable, ToString(true));
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			string name = GetExprName(prop);
+			((IFluentMap)this).NonUpdatable(name);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		/// <summary>
@@ -173,9 +165,10 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> Identity<TR>(Expression<Func<T, TR>> prop)
 		{
-			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.Identity, ToString(true));
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+#warning need test
+			string name = GetExprName(prop);
+			((IFluentMap)this).Identity(name);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		/// <summary>
@@ -186,9 +179,9 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> SqlIgnore<TR>(Expression<Func<T, TR>> prop, bool ignore = true)
 		{
-			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.SqlIgnore.Ignore, ToString(ignore));
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			string name = GetExprName(prop);
+			((IFluentMap)this).SqlIgnore(name, ignore);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		/// <summary>
@@ -199,9 +192,9 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> MapIgnore<TR>(Expression<Func<T, TR>> prop, bool ignore = true)
 		{
-			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.MapIgnore.Ignore, ToString(ignore));
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			string name = GetExprName(prop);
+			((IFluentMap)this).MapIgnore(name, ignore);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		/// <summary>
@@ -210,9 +203,9 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> Trimmable<TR>(Expression<Func<T, TR>> prop)
 		{
-			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.Trimmable, ToString(true));
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			string name = GetExprName(prop);
+			((IFluentMap)this).Trimmable(name);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		/// <summary>
@@ -227,9 +220,9 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> MapValue<TV, TR>(Expression<Func<T, TR>> prop, TR origValue, TV value, params TV[] values)
 		{
-			var member = GetMemberExtension(prop);
-			FillMapValueExtension(member.Attributes, origValue, value, values);
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			string name = GetExprName(prop);
+			((IFluentMap)this).MapValue(name, origValue, value, values);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		/// <summary>
@@ -241,9 +234,9 @@ namespace BLToolkit.Fluent
 		public MapFieldMap<T, TR> DefaultValue<TR>(Expression<Func<T, TR>> prop, TR value)
 		{
 #warning need test
-			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.DefaultValue, Convert.ToString(value));
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			string name = GetExprName(prop);
+			((IFluentMap)this).DefaulValue(name, value);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		/// <summary>
@@ -255,9 +248,9 @@ namespace BLToolkit.Fluent
 		public MapFieldMap<T, TR> Nullable<TR>(Expression<Func<T, TR>> prop, bool isNullable = true)
 		{
 #warning need test
-			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.Nullable.IsNullable, ToString(isNullable));
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			string name = GetExprName(prop);
+			((IFluentMap)this).Nullable(name, isNullable);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		/// <summary>
@@ -269,9 +262,9 @@ namespace BLToolkit.Fluent
 		public MapFieldMap<T, TR> NullValue<TR>(Expression<Func<T, TR>> prop, TR value)
 		{
 #warning need test
-			var member = GetMemberExtension(prop);
-			member.Attributes.Add(Attributes.NullValue, Convert.ToString(value));
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			string name = GetExprName(prop);
+			((IFluentMap)this).NullValue(name, value);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		/// <summary>
@@ -284,11 +277,11 @@ namespace BLToolkit.Fluent
 		/// <param name="thisKey"></param>
 		/// <param name="thisKeys"></param>
 		/// <returns></returns>
-		public AssociationMap<TR, TRt> Association<TRt, TR>(Expression<Func<T, TR>> prop, bool canBeNull, Expression<Func<T, TRt>> thisKey, params Expression<Func<T, TRt>>[] thisKeys)
+		public MapFieldMap<T, TR>.AssociationMap<TRt> Association<TRt, TR>(Expression<Func<T, TR>> prop, bool canBeNull, Expression<Func<T, TRt>> thisKey, params Expression<Func<T, TRt>>[] thisKeys)
 		{
 			var keys = new List<Expression<Func<T, TRt>>>(thisKeys);
 			keys.Insert(0, thisKey);
-			return new AssociationMap<TR, TRt>(new MapFieldMap<T, TR>(_typeExtension, prop), canBeNull, keys);
+			return new MapFieldMap<T, TR>.AssociationMap<TRt>(new MapFieldMap<T, TR>(_typeExtension, Childs, prop), canBeNull, keys);
 		}
 
 		/// <summary>
@@ -300,9 +293,29 @@ namespace BLToolkit.Fluent
 		/// <param name="thisKey"></param>
 		/// <param name="thisKeys"></param>
 		/// <returns></returns>
-		public AssociationMap<TR, TRt> Association<TRt, TR>(Expression<Func<T, TR>> prop, Expression<Func<T, TRt>> thisKey, params Expression<Func<T, TRt>>[] thisKeys)
+		public MapFieldMap<T, TR>.AssociationMap<TRt> Association<TRt, TR>(Expression<Func<T, TR>> prop, Expression<Func<T, TRt>> thisKey, params Expression<Func<T, TRt>>[] thisKeys)
 		{
 			return Association(prop, true, thisKey, thisKeys);
+		}
+
+		protected MapFieldMap<T, TR> Association<TRt, TR, TRf, TRo>(Expression<Func<T, TR>> prop, bool canBeNull
+			, IEnumerable<Expression<Func<T, TRt>>> thisKeys, IEnumerable<Expression<Func<TRf, TRo>>> otherKeys)
+		{
+			string name = GetExprName(prop);
+			((IFluentMap)this).Association(name, canBeNull, KeysToString(thisKeys.ToArray()), KeysToString(otherKeys.ToArray()));
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
+		}
+
+		/// <summary>
+		/// Reverse on BLToolkit.Mapping.Association.ParseKeys()
+		/// </summary>
+		/// <typeparam name="T1"></typeparam>
+		/// <typeparam name="T2"></typeparam>
+		/// <param name="keys"></param>
+		/// <returns></returns>
+		private string KeysToString<T1, T2>(IEnumerable<Expression<Func<T1, T2>>> keys)
+		{
+			return keys.Select(GetExprName).Aggregate((s1, s2) => s1 + ", " + s2);
 		}
 
 		/// <summary>
@@ -328,30 +341,15 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> Relation<TR>(Expression<Func<T, TR>> prop, string[] slaveIndex, string[] masterIndex)
 		{
+			string name = GetExprName(prop);
+
 			slaveIndex = (slaveIndex ?? new string[0]).Where(i => !string.IsNullOrEmpty(i)).ToArray();
 			masterIndex = (masterIndex ?? new string[0]).Where(i => !string.IsNullOrEmpty(i)).ToArray();
 
 			Type destinationType = typeof(TR);
-			if (TypeHelper.IsSameOrParent(typeof(IEnumerable), destinationType))
-			{
-				destinationType = destinationType.GetGenericArguments().Single();
-			}
-			var member = GetMemberExtension(prop);
-			AttributeExtensionCollection attrs;
-			if (!member.Attributes.TryGetValue(TypeExtension.NodeName.Relation, out attrs))
-			{
-				attrs = new AttributeExtensionCollection();
-				member.Attributes.Add(TypeExtension.NodeName.Relation, attrs);
-			}
-			attrs.Clear();
-			var attributeExtension = new AttributeExtension();
-			attributeExtension.Values.Add(TypeExtension.AttrName.DestinationType, destinationType.AssemblyQualifiedName);
-			attrs.Add(attributeExtension);
 
-			FillRelationIndex(slaveIndex, attributeExtension, TypeExtension.NodeName.SlaveIndex);
-			FillRelationIndex(masterIndex, attributeExtension, TypeExtension.NodeName.MasterIndex);
-
-			return new MapFieldMap<T, TR>(_typeExtension, prop);
+			((IFluentMap)this).Relation(name, destinationType, slaveIndex, masterIndex);
+			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
 		private void FillRelationIndex(string[] index, AttributeExtension attributeExtension, string indexName)
@@ -379,14 +377,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public FluentMap<T> MapValue<TV>(Enum origValue, TV value, params TV[] values)
 		{
-			MemberExtension member;
-			var name = Enum.GetName(origValue.GetType(), origValue);
-			if (!_typeExtension.Members.TryGetValue(name, out member))
-			{
-				member = new MemberExtension { Name = name };
-				_typeExtension.Members.Add(member);
-			}
-			FillMapValueExtension(member.Attributes, origValue, value, values);
+			((IFluentMap)this).MapValue(origValue, value, values);
 			return this;
 		}
 
@@ -400,8 +391,19 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public FluentMap<T> MapValue<TV>(object origValue, TV value, params TV[] values)
 		{
-			FillMapValueExtension(_typeExtension.Attributes, origValue, value, values);
+			((IFluentMap)this).MapValue(origValue, value, values);
 			return this;
+		}
+
+		/// <summary>
+		/// MapFieldAttribute(isInheritanceDescriminator = true)
+		/// </summary>
+		/// <typeparam name="TR"></typeparam>
+		/// <param name="prop"></param>
+		/// <returns></returns>
+		public FluentMap<T> InheritanceField<TR>(Expression<Func<T, TR>> prop)
+		{
+			return MapField(prop, true);
 		}
 
 		/// <summary>
@@ -435,23 +437,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public FluentMap<T> InheritanceMapping<TC>(object code, bool? isDefault)
 		{
-			AttributeExtensionCollection extList;
-			if (!_typeExtension.Attributes.TryGetValue(Attributes.InheritanceMapping.Name, out extList))
-			{
-				extList = new AttributeExtensionCollection();
-				_typeExtension.Attributes.Add(Attributes.InheritanceMapping.Name, extList);
-			}
-			var attr = new AttributeExtension();
-			attr.Values.Add(Attributes.InheritanceMapping.Type, typeof(TC).AssemblyQualifiedName);
-			if (null != code)
-			{
-				attr.Values.Add(Attributes.InheritanceMapping.Code, code);
-			}
-			if (null != isDefault)
-			{
-				attr.Values.Add(Attributes.InheritanceMapping.IsDefault, isDefault.Value);
-			}
-			extList.Add(attr);
+			((IFluentMap)this).InheritanceMapping(typeof(TC), code, isDefault);
 			return this;
 		}
 
@@ -482,9 +468,11 @@ namespace BLToolkit.Fluent
 		/// Fluent settings result
 		/// </summary>
 		/// <returns></returns>
-		public TypeExtension Map()
+		public ExtensionList Map()
 		{
-			return _typeExtension;
+			var result = new ExtensionList();
+			MapTo(result);
+			return result;
 		}
 
 		/// <summary>
@@ -523,12 +511,17 @@ namespace BLToolkit.Fluent
 		/// <param name="extensions"></param>
 		public void MapTo(ExtensionList extensions)
 		{
-			var ext = Map();
-			if (extensions.ContainsKey(ext.Name))
+			var ext = _typeExtension;
+			TypeExtension oldExt;
+			if (extensions.TryGetValue(ext.Name, out oldExt))
 			{
-				extensions.Remove(ext.Name);
+				FluentMapHelper.MergeExtensions(ext, ref oldExt);
 			}
-			extensions.Add(ext);
+			else
+			{
+				extensions.Add(ext);
+			}
+			EachChilds(m => m.MapTo(extensions));
 		}
 
 		protected MemberExtension GetMemberExtension<TR>(Expression<Func<T, TR>> prop)
@@ -573,6 +566,33 @@ namespace BLToolkit.Fluent
 		protected string ToString(bool value)
 		{
 			return Convert.ToString(value);
+		}
+
+		private void EachChilds(Action<IFluentMap> action)
+		{
+			foreach (var childMap in Childs)
+			{
+				action(childMap);
+			}
+		}
+
+		private List<IFluentMap> Childs
+		{
+			get
+			{
+				if (null == _childs)
+				{
+					_childs = new List<IFluentMap>();
+					var thisType = typeof(T);
+					var fmType = typeof(FluentMap<>);
+					// Find child only first generation ... other generation find recursive
+					foreach (var childType in thisType.Assembly.GetTypes().Where(t => t.BaseType == thisType))
+					{
+						_childs.Add((IFluentMap)Activator.CreateInstance(fmType.MakeGenericType(childType)));
+					}
+				}
+				return _childs;
+			}
 		}
 	}
 }

@@ -13,18 +13,15 @@ namespace BLToolkit.Fluent
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <typeparam name="TR"></typeparam>
-	public class MapFieldMap<T, TR> : FluentMap<T>
+	public partial class MapFieldMap<T, TR> : FluentMap<T>
 	{
-		public MapFieldMap(TypeExtension owner, Expression<Func<T, TR>> prop)
-			: base(owner)
-		{
-			Prop = prop;
-		}
+		private readonly Expression<Func<T, TR>> _prop;
 
-		/// <summary>
-		/// Current context
-		/// </summary>
-		public Expression<Func<T, TR>> Prop { get; private set; }
+		public MapFieldMap(TypeExtension owner, List<IFluentMap> childs, Expression<Func<T, TR>> prop)
+			: base(owner, childs)
+		{
+			_prop = prop;
+		}
 
 		/// <summary>
 		/// PrimaryKeyAttribute
@@ -34,7 +31,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> PrimaryKey(int order = -1)
 		{
-			return PrimaryKey(Prop, order);
+			return PrimaryKey(_prop, order);
 		}
 
 		/// <summary>
@@ -43,7 +40,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> NonUpdatable()
 		{
-			return NonUpdatable(Prop);
+			return NonUpdatable(_prop);
 		}
 
 		/// <summary>
@@ -53,7 +50,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> Identity()
 		{
-			return Identity(Prop);
+			return Identity(_prop);
 		}
 
 		/// <summary>
@@ -63,7 +60,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> SqlIgnore(bool ignore = true)
 		{
-			return SqlIgnore(Prop, ignore);
+			return SqlIgnore(_prop, ignore);
 		}
 
 		/// <summary>
@@ -73,7 +70,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> MapIgnore(bool ignore = true)
 		{
-			return MapIgnore(Prop, ignore);
+			return MapIgnore(_prop, ignore);
 		}
 
 		/// <summary>
@@ -82,7 +79,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> Trimmable()
 		{
-			return Trimmable(Prop);
+			return Trimmable(_prop);
 		}
 
 		/// <summary>
@@ -95,7 +92,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> MapValue<TV>(TR origValue, TV value, params TV[] values)
 		{
-			return MapValue(Prop, origValue, value, values);
+			return MapValue(_prop, origValue, value, values);
 		}
 
 		/// <summary>
@@ -105,7 +102,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> DefaultValue(TR value)
 		{
-			return DefaultValue(Prop, value);
+			return DefaultValue(_prop, value);
 		}
 
 		/// <summary>
@@ -115,7 +112,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> Nullable(bool isNullable = true)
 		{
-			return Nullable(Prop, isNullable);
+			return Nullable(_prop, isNullable);
 		}
 
 		/// <summary>
@@ -125,7 +122,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> NullValue(TR value)
 		{
-			return NullValue(Prop, value);
+			return NullValue(_prop, value);
 		}
 
 		/// <summary>
@@ -136,9 +133,9 @@ namespace BLToolkit.Fluent
 		/// <param name="thisKey"></param>
 		/// <param name="thisKeys"></param>
 		/// <returns></returns>
-		public AssociationMap<TR, TRt> Association<TRt>(bool canBeNull, Expression<Func<T, TRt>> thisKey, params Expression<Func<T, TRt>>[] thisKeys)
+		public AssociationMap<TRt> Association<TRt>(bool canBeNull, Expression<Func<T, TRt>> thisKey, params Expression<Func<T, TRt>>[] thisKeys)
 		{
-			return Association(Prop, canBeNull, thisKey, thisKeys);
+			return Association(_prop, canBeNull, thisKey, thisKeys);
 		}
 
 		/// <summary>
@@ -148,9 +145,15 @@ namespace BLToolkit.Fluent
 		/// <param name="thisKey"></param>
 		/// <param name="thisKeys"></param>
 		/// <returns></returns>
-		public AssociationMap<TR, TRt> Association<TRt>(Expression<Func<T, TRt>> thisKey, params Expression<Func<T, TRt>>[] thisKeys)
+		public AssociationMap<TRt> Association<TRt>(Expression<Func<T, TRt>> thisKey, params Expression<Func<T, TRt>>[] thisKeys)
 		{
-			return Association(Prop, thisKey, thisKeys);
+			return Association(_prop, thisKey, thisKeys);
+		}
+
+		private MapFieldMap<T, TR> Association<TRt, TRf, TRo>(bool canBeNull
+			, IEnumerable<Expression<Func<T, TRt>>> thisKeys, IEnumerable<Expression<Func<TRf, TRo>>> otherKeys)
+		{
+			return Association(_prop, canBeNull, thisKeys, otherKeys);
 		}
 
 		/// <summary>
@@ -161,7 +164,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> Relation(string slaveIndex = null, string masterIndex = null)
 		{
-			return Relation(Prop, slaveIndex, masterIndex);
+			return Relation(_prop, slaveIndex, masterIndex);
 		}
 
 		/// <summary>
@@ -172,7 +175,7 @@ namespace BLToolkit.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> Relation(string[] slaveIndex, string[] masterIndex)
 		{
-			return Relation(Prop, slaveIndex, masterIndex);
+			return Relation(_prop, slaveIndex, masterIndex);
 		}
 	}
 }
