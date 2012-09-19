@@ -22,6 +22,10 @@ namespace BLToolkit.Fluent
 
 		public static void MergeExtensions(TypeExtension fromExt, ref TypeExtension toExt)
 		{
+			if (ReferenceEquals(fromExt, toExt))
+			{
+				return;
+			}
 			foreach (var attribute in fromExt.Attributes)
 			{
 				AttributeExtensionCollection attrs;
