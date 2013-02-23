@@ -14,12 +14,13 @@ namespace BLToolkit.Fluent.MemberMappers
         }
 
         public override object GetValue(object o)
-        {            
-            return Convert.ToBase64String(this.binaryserialize(o));            
+        {
+            return Convert.ToBase64String(this.binaryserialize(this.MemberAccessor.GetValue(o)));            
         }        
 
         private byte[] binaryserialize(object obj)
         {
+            if (obj == null) return null;
             MemoryStream memoryStream = new MemoryStream();
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             binaryFormatter.Serialize(memoryStream, obj);

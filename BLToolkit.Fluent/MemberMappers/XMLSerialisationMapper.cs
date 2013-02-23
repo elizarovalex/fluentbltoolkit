@@ -9,7 +9,6 @@ namespace BLToolkit.Fluent.MemberMappers
 {
     public class XMLSerialisationMapper : MemberMapper
     {
-
         public override void SetValue(object o, object value)
         {
             if (value != null) this.MemberAccessor.SetValue(o, this.deserialize(value.ToString()));
@@ -17,13 +16,12 @@ namespace BLToolkit.Fluent.MemberMappers
 
         public override object GetValue(object o)
         {
-            return this.xmlserialize(o);
+            return this.xmlserialize(this.MemberAccessor.GetValue(o));
         }
 
         private string xmlserialize(object obj)
         {
-            if (obj == null) return string.Empty;
-
+            if (obj == null) return null;
             XmlSerializer serializer = new XmlSerializer(this.Type);
             MemoryStream ms = new MemoryStream();
             XmlWriterSettings settings = new XmlWriterSettings();
