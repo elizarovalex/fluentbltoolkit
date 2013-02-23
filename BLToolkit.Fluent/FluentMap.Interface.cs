@@ -202,6 +202,19 @@ namespace BLToolkit.Fluent
 			EachChilds(m => m.DefaulValue(propName, value));
 		}
 
+        /// <summary>
+        /// MemberMapper
+		/// </summary>
+		/// <typeparam name="TR">The type of the R.</typeparam>
+		/// <param name="propName">Name of the prop.</param>
+		/// <param name="value">The value.</param>
+        void IFluentMap.MemberMapper<TR>(string propName, Type memberType, Type memberMapperType)
+		{
+            var member = GetMemberExtension(propName);
+            FillMemberMapperExtension(member.Attributes, memberType, memberMapperType);
+            EachChilds(m => m.MemberMapper<TR>(propName, memberType, memberMapperType));
+		}
+        
 		/// <summary>
 		/// Nullables the specified prop name.
 		/// </summary>

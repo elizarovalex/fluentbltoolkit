@@ -115,6 +115,14 @@ namespace BLToolkit.Fluent
 		/// <param name="value">The value.</param>
 		void DefaulValue<TR>(string propName, TR value);
 
+        /// <summary>
+        /// MemberMapper
+		/// </summary>
+		/// <typeparam name="TR">The type of the R.</typeparam>
+		/// <param name="propName">Name of the prop.</param>
+		/// <param name="value">The value.</param>
+        void MemberMapper<TR>(string propName, Type memberType, Type memberMapperType);
+        
 		/// <summary>
 		/// Nullables the specified prop name.
 		/// </summary>

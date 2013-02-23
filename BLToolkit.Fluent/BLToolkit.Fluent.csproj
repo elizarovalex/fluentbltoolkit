@@ -52,6 +52,9 @@
     <Compile Include="FluentMapHelper.cs" />
     <Compile Include="IFluentMap.cs" />
     <Compile Include="MapFieldMap.cs" />
+    <Compile Include="MemberMappers\BinarySerialisationMapper.cs" />
+    <Compile Include="MemberMappers\BinarySerialisationToBase64StringMapper.cs" />
+    <Compile Include="MemberMappers\XMLSerialisationMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
