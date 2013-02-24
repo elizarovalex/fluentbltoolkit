@@ -60,7 +60,15 @@
 			public const string Identity = "Identity";
 			public const string Trimmable = "Trimmable";
 			public const string DefaultValue = "DefaultValue";
-			public const string NullValue = "NullValue";
+
+		    public static class MemberMapper
+		    {
+		        public const string Name = "MemberMapper";
+                public const string MemberType = "MemberType";
+		        public const string MemberMapperType = "MemberMapperType";
+		    }
+
+		    public const string NullValue = "NullValue";
 		}
 	}
 }

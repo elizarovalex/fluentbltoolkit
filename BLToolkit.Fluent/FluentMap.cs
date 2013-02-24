@@ -239,6 +239,32 @@ namespace BLToolkit.Fluent
 			return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
 		}
 
+        /// <summary>
+        /// MemberMapperAttribute
+		/// </summary>
+		/// <param name="prop"> </param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+        public MapFieldMap<T, TR> MemberMapper<TR>(Expression<Func<T, TR>> prop, Type memberMapperType)
+		{
+#warning need test
+			return MemberMapper<TR>(prop, null, memberMapperType);
+		}
+
+        /// <summary>
+        /// MemberMapperAttribute
+        /// </summary>
+        /// <param name="prop"> </param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public MapFieldMap<T, TR> MemberMapper<TR>(Expression<Func<T, TR>> prop, Type memberType, Type memberMapperType)
+        {
+#warning need test
+            string name = GetExprName(prop);
+            ((IFluentMap)this).MemberMapper<TR>(name, memberType, memberMapperType);
+            return new MapFieldMap<T, TR>(_typeExtension, Childs, prop);
+        }
+
 		/// <summary>
 		/// NullableAttribute
 		/// </summary>
@@ -464,7 +490,21 @@ namespace BLToolkit.Fluent
 			}
 		}
 
-		/// <summary>
+        protected void FillMemberMapperExtension(AttributeNameCollection attributeCollection, Type memberType, Type memberMapperType)
+	    {
+            AttributeExtensionCollection attrs;
+            if (!attributeCollection.TryGetValue(Attributes.MemberMapper.Name, out attrs))
+            {
+                attrs = new AttributeExtensionCollection();
+                attributeCollection.Add(Attributes.MemberMapper.Name, attrs);
+            }
+            var attributeExtension = new AttributeExtension();
+            attributeExtension.Values.Add(Attributes.MemberMapper.MemberType, memberType);
+            attributeExtension.Values.Add(Attributes.MemberMapper.MemberMapperType, memberMapperType);
+            attrs.Add(attributeExtension);	       
+	    }
+
+	    /// <summary>
 		/// Fluent settings result
 		/// </summary>
 		/// <returns></returns>

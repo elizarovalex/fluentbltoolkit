@@ -105,6 +105,26 @@ namespace BLToolkit.Fluent
 			return DefaultValue(_prop, value);
 		}
 
+        /// <summary>
+        /// MemberMapperAttribute
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public MapFieldMap<T, TR> MemberMapper(Type memberMapperType)
+        {
+            return MemberMapper(_prop, memberMapperType);
+        }
+
+        /// <summary>
+        /// MemberMapperAttribute
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public MapFieldMap<T, TR> MemberMapper(Type memberType, Type memberMapperType)
+        {
+            return MemberMapper(_prop, memberType, memberMapperType);
+        }
+
 		/// <summary>
 		/// NullableAttribute
 		/// </summary>
