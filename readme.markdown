@@ -1,3 +1,4 @@
+Fluent BLToolkit now is part of [BLToolkit](http://bltoolkit.net/)
 ## Getting started
 ### BLToolkit attribute way
 
@@ -49,3 +50,6 @@ Apply settings
 		    .Configure(Map.DefaultSchema)
 			    .MapingFromAssemblyOf<Category>();
 	}
+
+## License
+Fluent BLToolkit is licensed under [MIT License](http://en.wikipedia.org/wiki/MIT_License)
