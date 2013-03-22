@@ -83,7 +83,7 @@ namespace BLToolkit.Fluent
 		}
 
 		/// <summary>
-		/// MapValueAttribute
+		/// MapValueAttribute. Applied for select operations. Not applied for update operations
 		/// </summary>
 		/// <typeparam name="TV"> </typeparam>
 		/// <param name="origValue"></param>

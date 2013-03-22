@@ -75,7 +75,7 @@ namespace BLToolkit.Fluent
 		}
 
 		/// <summary>
-		/// MapFieldAttribute
+		/// MapFieldAttribute. Applied for select operations. Not applied for update operations
 		/// </summary>
 		/// <typeparam name="TR"></typeparam>
 		/// <param name="prop"></param>
@@ -87,7 +87,7 @@ namespace BLToolkit.Fluent
 		}
 
 		/// <summary>
-		/// MapFieldAttribute
+		/// MapFieldAttribute. Applied for select operations. Not applied for update operations
 		/// </summary>
 		/// <typeparam name="TR"></typeparam>
 		/// <param name="prop"></param>

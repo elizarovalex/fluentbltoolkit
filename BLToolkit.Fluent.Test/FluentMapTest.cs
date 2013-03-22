@@ -6,13 +6,12 @@ using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Fluent.Test.MockDataBase;
 using BLToolkit.Mapping;
-using BLToolkit.Reflection.Extension;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BLToolkit.Fluent.Test
 {
 	/// <summary>
-	/// Тестирование FluentMap
+	/// Test for FluentMap
 	/// </summary>
 	[TestClass]
 	public class FluentMapTest
@@ -544,7 +543,7 @@ namespace BLToolkit.Fluent.Test
 			using (conn)
 			using (var db = new DbManager(conn))
 			{
-#warning bug for maping TO db
+#warning bug for maping TO db (see test ShouldFailMapValueForInsert)
 				// fluent config
 				new FluentMap<MapValueMemberDbo>()
 					.MapField(_ => _.Field1)
@@ -566,6 +565,50 @@ namespace BLToolkit.Fluent.Test
 			}
 		}
 
+#warning this test is fail
+		/// <summary>
+		/// MapValue mapping for member. Update DB operations
+		/// This test fail. This test show what is "bug for maping TO db"
+		/// </summary>
+		[TestMethod]
+		public void ShouldFailMapValueForInsert()
+		{
+			// db config
+			var conn = new MockDb()
+				.NewNonQuery()
+				.NewNonQuery();
+
+			using (conn)
+			using (var db = new DbManager(conn))
+			{
+				// fluent config
+				new FluentMap<MapValueMemberDbo>()
+					.MapField(_ => _.Field1)
+						.MapValue("result true", true)
+						.MapValue("result false", false)
+					.MapField(_ => _.Field2)
+						.MapValue("value true", true)
+						.MapValue("value false", false)
+					.MapTo(db);
+
+				var table = db.GetTable<MapValueMemberDbo>();
+
+				// when
+				table.Insert(() => new MapValueMemberDbo { Field1 = "result true", Field2 = "value false" }); // linq
+				db.Insert(new MapValueMemberDbo { Field1 = "result true", Field2 = "value false" }); // other?
+
+				// then
+				var i1 = conn.Commands[0].CommandText.IndexOf("result true", StringComparison.Ordinal);
+				Assert.IsTrue(-1 == i1, "Not map to value1 for linq");
+
+				var i2 = conn.Commands[0].CommandText.IndexOf("value false", StringComparison.Ordinal);
+				Assert.IsTrue(-1 == i2, "Not map to value2 for linq");
+
+				Assert.AreEqual(true, conn.Commands[1].Parameters[0].Value, "Not map to value1");
+				Assert.AreEqual(false, conn.Commands[1].Parameters[1].Value, "Not map to value2");
+			}
+		}
+
 		/// <summary>
 		/// MapValue mapping for member for child
 		/// </summary>
@@ -580,7 +623,7 @@ namespace BLToolkit.Fluent.Test
 			using (conn)
 			using (var db = new DbManager(conn))
 			{
-#warning bug for maping TO db
+#warning bug for maping TO db (see test ShouldFailMapValueForInsert)
 				// fluent config
 				new FluentMap<MapValueMemberDbo>()
 					.MapField(_ => _.Field1)
@@ -616,7 +659,7 @@ namespace BLToolkit.Fluent.Test
 			using (conn)
 			using (var db = new DbManager(conn))
 			{
-#warning bug for maping TO db
+#warning bug for maping TO db (see test ShouldFailMapValueForInsert)
 				// fluent config
 				new FluentMap<MapValueEnumDbo>()
 					.MapValue(MapValueEnum.Value1, "ok", "yes")
@@ -649,7 +692,7 @@ namespace BLToolkit.Fluent.Test
 			using (conn)
 			using (var db = new DbManager(conn))
 			{
-#warning bug for maping TO db
+#warning bug for maping TO db (see test ShouldFailMapValueForInsert)
 				// fluent config
 				new FluentMap<MapValueEnumDbo>()
 					.MapValue(MapValueEnum.Value1, "ok", "yes")
@@ -682,8 +725,8 @@ namespace BLToolkit.Fluent.Test
 			using (conn)
 			using (var db = new DbManager(conn))
 			{
-#warning bug for property any different types
-#warning bug for maping TO db
+#warning bug for property any different types (see test ShouldFailMapValueForTypeForPropertyAnyDifferentTypes)
+#warning bug for maping TO db (see test ShouldFailMapValueForInsert)
 				// fluent config
 				new FluentMap<MapValueTypeDbo>()
 					.MapValue(1, "one", "1")
@@ -703,6 +746,36 @@ namespace BLToolkit.Fluent.Test
 			}
 		}
 
+#warning this test is fail
+		/// <summary>
+		/// MapValue mapping for type
+		/// This test fail. This test show what is "bug for property any different types"
+		/// </summary>
+		[TestMethod]
+		public void ShouldFailMapValueForTypeForPropertyAnyDifferentTypes()
+		{
+			// db config
+			var conn = new MockDb()
+				.NewReader("Field1", "Field2")
+					.NewRow("one", 2);
+
+			using (conn)
+			using (var db = new DbManager(conn))
+			{
+				// fluent config
+				new FluentMap<MapValueTypeDbo2>()
+					.MapValue(1, "one") // Field1 - int
+					.MapValue("two", 2) // Filed2 - string
+					.MapTo(db);
+
+				var table = db.GetTable<MapValueTypeDbo2>();
+
+				// when / then
+				AssertExceptionEx.AreNotException<Exception>(() => { var dbo = (from t in table select t).First(); }
+					, "Bug for property any different types");
+			}
+		}
+
 		/// <summary>
 		/// MapValue mapping for type for child
 		/// </summary>
@@ -717,8 +790,8 @@ namespace BLToolkit.Fluent.Test
 			using (conn)
 			using (var db = new DbManager(conn))
 			{
-#warning bug for property any different types
-#warning bug for maping TO db
+#warning bug for property any different types (see test ShouldFailMapValueForTypeForPropertyAnyDifferentTypes)
+#warning bug for maping TO db (see test ShouldFailMapValueForInsert)
 				// fluent config
 				new FluentMap<MapValueTypeDbo>()
 					.MapValue(1, "one", "1")
@@ -1156,6 +1229,11 @@ namespace BLToolkit.Fluent.Test
 		}
 		public class MapValueTypeChildDbo : MapValueTypeDbo
 		{
+		}
+		public class MapValueTypeDbo2
+		{
+			public int Field1 { get; set; }
+			public string Field2 { get; set; }
 		}
 		public abstract class InheritanceMappingDbo
 		{

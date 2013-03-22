@@ -62,9 +62,9 @@ namespace BLToolkit.Fluent.Test.MockDataBase
 			set { _commands.Add(value); }
 		}
 
-		public MockDb NewNonQuery(int value = 1)
+		public MockDb NewNonQuery(int nonQueryResult = 1)
 		{
-			CurrentSetupCommandData = new MockCommandData { NonQueryResult = value };
+			CurrentSetupCommandData = new MockCommandData { NonQueryResult = nonQueryResult };
 			return this;
 		}
 	}
